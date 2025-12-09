@@ -1,32 +1,41 @@
 import streamlit as st
 import requests
 from pathlib import Path
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ASSETS_PATH = Path(__file__).absolute().parents[1] / "assets"
+url = f"https://labb-youtuber.azurewebsites.net/rag/query?code={os.getenv('FUNCTION_APP_API')}"
+
 
 def layout():
+    st.title("Youtube Bot")
+    st.caption("Ask a question about different the youtube videos")
+    st.session_state.setdefault(
+        "messages", [{"role": "assistant", "content": "How can I help you?"}]
+    )
 
-    st.markdown("# Youtube Bot")
-    st.markdown("Ask a question about different the youtube videos")
-    text_input = st.text_input(label="Ask a questions")
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
 
-    if st.button("Ask") and text_input.strip() != "":
-        response = requests.post(
-            "http://127.0.0.1:8000/rag/query", json={"prompt": text_input}
-        )
+    prompt = st.chat_input("Ask a question")
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.chat_message("user").write(prompt)
 
+        response = requests.post(url, json={"prompt": prompt})
+        response.raise_for_status()
         data = response.json()
-        cols = st.columns(2)
+        answer = data.get("answer")
+        source = data.get("filepath")
 
-        with cols[0]:
-            st.markdown("## Question:")
-            st.markdown(text_input)
-            with st.expander("## Source:"):
-                st.markdown(data["filepath"])
-
-        with cols[1]:
-            st.markdown("## Answer:")
-            st.markdown(data["answer"])
+        st.session_state.messages.append({"role": "assistant", "content": answer})
+        with st.chat_message("assistant"):
+            st.write(answer)
+            if source:
+                st.caption(f"Source: {source}")
 
 
 if __name__ == "__main__":
