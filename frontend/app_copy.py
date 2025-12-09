@@ -1,8 +1,14 @@
 import streamlit as st
 import requests
 from pathlib import Path
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ASSETS_PATH = Path(__file__).absolute().parents[1] / "assets"
+url = f"https://labb-youtuber.azurewebsites.net/rag/query?code={os.getenv('FUNCTION_APP_API')}"
+
 
 def layout():
     st.title("Youtube Bot")
@@ -19,8 +25,7 @@ def layout():
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
 
-        response = requests.post(
-            "http://127.0.0.1:8000/rag/query", json={"prompt": prompt})
+        response = requests.post(url, json={"prompt": prompt})
         response.raise_for_status()
         data = response.json()
         answer = data.get("answer")
