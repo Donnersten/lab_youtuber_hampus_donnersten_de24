@@ -1,6 +1,6 @@
 # lab_youtuber_hampus_donnersten_de24
 
-Enkel RAG-prototyp som svarar på frågor om YouTube-transkript. Backend kör FastAPI med LanceDB och Gemini, frontend är en Streamlit chat som anropar en Azure Function.
+Enkel RAG-prototyp som svarar på frågor om YouTube-transkript. Backend med LanceDB och Gemini, frontend är en Streamlit chat som anropar en Azure Function.
 
 ## Arkitektur i korthet
 - `ingestion.py` skapar en LanceDB-tabell och laddar in transkript från `data/`.
